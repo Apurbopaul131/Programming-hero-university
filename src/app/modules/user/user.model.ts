@@ -52,4 +52,4 @@ userSchema.post('save', function (doc, next) {
   doc.password = '';
   next();
 });
-export const UserModel = mongoose.model<TUser>('User', userSchema);
+export const User = mongoose.model<TUser>('User', userSchema);
