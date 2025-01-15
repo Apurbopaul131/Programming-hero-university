@@ -1,4 +1,5 @@
 import { model, Schema } from 'mongoose';
+import AppError from '../../error/appError';
 import { TAcademicSemester } from './academicSemester.interface';
 import {
   Months,
@@ -37,7 +38,7 @@ export const academicSemesterSchema = new Schema<TAcademicSemester>(
   },
 );
 
-//Pre hook middlewire to prevent samename in a same year
+//Pre hook middlewire to prevent same semester name in a same year
 academicSemesterSchema.pre('save', async function (next) {
   const isSemesterExist = await AcademicSemister.findOne({
     name: this.name,
@@ -45,7 +46,16 @@ academicSemesterSchema.pre('save', async function (next) {
   });
 
   if (isSemesterExist) {
-    throw new Error('Semester already exists!');
+    throw new AppError(404, 'Semester already exists!');
+  }
+  next();
+});
+
+academicSemesterSchema.pre('findOneAndUpdate', async function (next) {
+  const query = this.getQuery();
+  const isAcademicSemesterExist = await AcademicSemister.findOne(query);
+  if (!isAcademicSemesterExist) {
+    throw new AppError(404, 'Updated academic semester does not exist!!');
   }
   next();
 });

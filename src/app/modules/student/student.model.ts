@@ -104,7 +104,10 @@ const studentSchema = new mongoose.Schema<TStudent, StudentModel>(
       required: [true, 'Email is required'],
       unique: true,
     },
-    contactNo: { type: String, required: [true, 'Contact number is required'] },
+    contactNo: {
+      type: String,
+      required: [true, 'Contact number is required'],
+    },
     emergencyContactNo: {
       type: String,
       required: [true, 'Emergency contact number is required'],
@@ -138,6 +141,11 @@ const studentSchema = new mongoose.Schema<TStudent, StudentModel>(
       required: [true, 'Admission semester must be required'],
       ref: 'AcademicSemester',
     },
+    academicDepartment: {
+      type: Schema.Types.ObjectId,
+      required: [true, 'Academic department is required'],
+      ref: 'AcademicDepartment',
+    },
     isDeleted: {
       type: Boolean,
       default: false,
@@ -150,6 +158,14 @@ const studentSchema = new mongoose.Schema<TStudent, StudentModel>(
   },
 );
 
+//This pre middlewire ensure the user id is unique for every student
+// studentSchema.pre('save', async function (next) {
+//   const isUserExist = await Student.findOne({ user: this.user });
+//   if (isUserExist) {
+//     throw new AppError(404, 'Duplicate user!');
+//   }
+//   next();
+// });
 //Pre middilwire hooks to prevent retrive deleted student data from database
 studentSchema.pre('findOne', async function (next) {
   this.find({ isDeleted: { $ne: true } });
@@ -163,13 +179,13 @@ studentSchema.pre('find', async function (next) {
 //crete an virtuals fullname
 studentSchema.virtual('fullName').get(function () {
   const result = this.name?.middleName
-    ? `${this.name?.firstName} ${this.name?.middleName} ${this.name.lastName}`
-    : `${this.name?.firstName} ${this.name.lastName}`;
+    ? `${this.name?.firstName} ${this.name?.middleName} ${this.name?.lastName}`
+    : `${this.name?.firstName} ${this.name?.lastName}`;
   return result;
 });
 //crate statics method
 studentSchema.statics.isUserExists = async function (id: string) {
-  const isUserExist = await Student.findOne({ id });
+  const isUserExist = await Student.findById(id);
   return isUserExist;
 };
 export const Student = mongoose.model<TStudent, StudentModel>(

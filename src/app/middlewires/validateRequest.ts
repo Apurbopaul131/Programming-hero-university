@@ -6,7 +6,10 @@ const validateRequest = (validationSchema: AnyZodObject) => {
     //check client data by validation schema
     //if everything is okey then call next() -> controller
     try {
-      await validationSchema.parseAsync({ body: req.body });
+      await validationSchema.parseAsync({
+        body: req.body,
+        cookies: req.cookies,
+      });
       next();
     } catch (err) {
       //send to global error handler
